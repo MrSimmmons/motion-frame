@@ -1,8 +1,17 @@
 {
 	"name": "motion-frame",
-	"version": "1.0.0",
-	"description": "A Javascript lambda animation / easing engine",
-	"main": "motion.js",
+	"version": "2.0.0",
+	"description": "A Typescript lambda animation / easing engine",
+	"main": "dist/motion.js",
+	"module": "dist/esm/motion.js",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "rm -rf dist/ && npm run build:esm && npm run build:cjs",
+		"build:esm": "tsc",
+		"build:cjs": "tsc --module CommonJS --outDir dist/cjs"
+	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/MrSimmmons/motion-frame.git"
@@ -12,5 +21,8 @@
 	"bugs": {
 		"url": "https://github.com/MrSimmmons/motion-frame/issues"
 	},
-	"homepage": "https://github.com/MrSimmmons/motion-frame#readme"
+	"homepage": "https://github.com/MrSimmmons/motion-frame#readme",
+	"devDependencies": {
+		"typescript": "^4.8.4"
+	}
 }
