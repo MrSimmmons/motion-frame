@@ -1,6 +1,6 @@
 {
 	"name": "motion-frame",
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"description": "A Typescript lambda animation / easing engine",
 	"main": "dist/motion.js",
 	"module": "dist/esm/motion.js",
@@ -22,6 +22,14 @@
 		"url": "https://github.com/MrSimmmons/motion-frame/issues"
 	},
 	"homepage": "https://github.com/MrSimmmons/motion-frame#readme",
+	"keywords": [
+		"animation",
+		"requestAnimationFrame",
+		"typescript",
+		"javascript",
+		"lambda",
+		"lerp"
+	],
 	"devDependencies": {
 		"typescript": "^4.8.4"
 	}
