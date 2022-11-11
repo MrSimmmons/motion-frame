@@ -1,0 +1,16 @@
+{
+	"name": "motion-frame",
+	"version": "1.0.0",
+	"description": "A Javascript lambda animation / easing engine",
+	"main": "motion.js",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/MrSimmmons/motion-frame.git"
+	},
+	"author": "Simon Watson <@MrSimmmons>",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/MrSimmmons/motion-frame/issues"
+	},
+	"homepage": "https://github.com/MrSimmmons/motion-frame#readme"
+}

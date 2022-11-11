@@ -1,8 +1,8 @@
 /**
-* Cool little lambda based aniamtion engine
+* Cool little lambda based animation engine
 * @author Simon Watson
 *
-* @API animate();
+* @API motion();
 *
 * @usage
 * Use this API to animate DOM elements
@@ -28,7 +28,7 @@
 * @example 
 * This example will move an element to the vertical centre of the page, then back again because it is looping. It then updates the `count` element after each run with the total amount of times the animation has played.
 
-animate({
+motion({
 	ele: document.getElementById("foo"),
 	duration: 2000,
 	loop: true,
@@ -51,13 +51,13 @@ animate({
 	}
 });
 
-* @API new AnimationChain();
+* @API new MotionChain();
 *
 * @usage
 *
 *
 * @example
-* The API also has a chain wrapper that can be used to chain multiple animations togeather that play after one another, or even play them in reverse.
+* The API also has a chain wrapper that can be used to chain multiple animations together that play after one another, or even play them in reverse.
 
 */
 
@@ -66,19 +66,19 @@ let frameID;
 let instanceId = 0;
 
 /**
-* The function to call when you want to make an animation
-* @param {JSON} props The properties used to make an animation
-* @return {JSON} Optional. Returns a `.then()` function which gets called after every run of the animation
-*/
-function animate(props = {}) {
-	
-	let chainAfter = ()=> {};
-	
-	let startTime = 0, now = 0;
-	
+ * The function to call when you want to make an animation
+ * @param {JSON} props The properties used to make an animation
+ * @return {JSON} Optional. Returns a `.then()` function which gets called after every run of the animation
+ */
+function motion(props = {}) {
+	let chainAfter = () => {};
+
+	let startTime = 0,
+		now = 0;
+
 	let instance = createNewInstance(props);
-	
-	instance.tick = (time)=> {
+
+	instance.tick = (time) => {
 		now = time;
 		if (!startTime) startTime = now;
 		if (now - startTime >= instance.duration) {
@@ -95,39 +95,39 @@ function animate(props = {}) {
 			if (calculatedVal) instance.animation(instance, instance.reverse ? 1 - calculatedVal : calculatedVal);
 		}
 	};
-	
-	instance.resetRect = ()=> {
+
+	instance.resetRect = () => {
 		instance.eleBaseUpdate = instance.ele.getBoundingClientRect();
 	};
-	
-	instance.chainAfter = (afterFunc)=> {
+
+	instance.chainAfter = (afterFunc) => {
 		chainAfter = afterFunc;
 	};
-	
-	instance.toggleReverse = ()=> {
+
+	instance.toggleReverse = () => {
 		instance.reverse = !instance.reverse;
 	};
-	
-	instance.play = ()=> {
+
+	instance.play = () => {
 		instance.resetRect();
 		activeInstances.push(instance);
 		if (!frameID) engine();
 	};
-	
-	instance.reset = (fromPosition = false)=> {
-		if (!fromPosition) instance.ele.style = '';
+
+	instance.reset = (fromPosition = false) => {
+		if (!fromPosition) instance.ele.style = "";
 		instance.stop = false;
 		startTime = 0;
 		instance.play();
 	};
-	
-	setTimeout(()=> {
+
+	setTimeout(() => {
 		instance.play();
 	}, instance.delay);
-	
+
 	return {
 		get: instance
-	}
+	};
 }
 
 function createNewInstance(props) {
@@ -142,19 +142,19 @@ function createNewInstance(props) {
 		reverse: props.reverse || false,
 		reverseAfter: props.reverseAfter || false,
 		loop: props.loop || false,
-		easing: props.easing || ((x)=>x),
+		easing: props.easing || ((x) => x),
 		stop: props.stop || false,
 		animation: props.animation,
 		cssOptions: props.cssOptions || {},
-		then: props.then || (()=> {})
-	}
+		then: props.then || (() => {})
+	};
 }
 
 function engine() {
 	function play() {
 		frameID = requestAnimationFrame(step);
 	}
-	
+
 	function step(time) {
 		let activeInstancesLength = activeInstances.length;
 		if (activeInstancesLength) {
@@ -169,22 +169,21 @@ function engine() {
 				}
 			}
 			play();
-		}
-		else frameID = cancelAnimationFrame(frameID);
+		} else frameID = cancelAnimationFrame(frameID);
 	}
-	
+
 	return play();
 }
 
-class AnimationChain {
+class MotionChain {
 	constructor(animationInfo) {
 		this.animationInfo = animationInfo;
 		this.animationInstances = [];
 		this.runningInstances = [];
-		
+
 		for (let ani of this.animationInfo) {
 			ani.stop = true;
-			this.animationInstances.push(animate(ani).get);
+			this.animationInstances.push(motion(ani).get);
 		}
 	}
 
@@ -200,13 +199,13 @@ class AnimationChain {
 		for (let x of this.runningInstances) x.reverse = true;
 		this.run();
 	}
-	
+
 	run() {
 		for (let i = 0; i < this.runningInstances.length; i++) {
 			if (i < this.runningInstances.length - 1) {
-				this.runningInstances[i].chainAfter(()=> this.runningInstances[i + 1].reset(true));
+				this.runningInstances[i].chainAfter(() => this.runningInstances[i + 1].reset(true));
 			} else {
-				this.runningInstances[i].chainAfter(()=> this.runningInstances = []);
+				this.runningInstances[i].chainAfter(() => (this.runningInstances = []));
 			}
 		}
 		this.runningInstances[0].reset(true);
@@ -214,13 +213,13 @@ class AnimationChain {
 }
 
 const easings = {
-	easeInOutQuart: (x)=> {
+	easeInOutQuart: (x) => {
 		return x < 0.5 ? 8 * x * x * x * x : 1 - Math.pow(-2 * x + 2, 4) / 2;
 	},
-	easeOutQuart: (x)=> {
+	easeOutQuart: (x) => {
 		return 1 - Math.pow(1 - x, 4);
 	},
-	easeInQuart: (x)=> {
+	easeInQuart: (x) => {
 		return x * x * x * x;
 	}
-}
+};
