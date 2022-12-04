@@ -1,16 +1,24 @@
 {
 	"name": "motion-frame",
-	"version": "2.0.1",
+	"version": "2.0.2",
 	"description": "A Typescript lambda animation / easing engine",
-	"main": "dist/motion.js",
+	"main": "dist/cjs/motion.js",
 	"module": "dist/esm/motion.js",
+	"types": "dist/esm/motion.d.ts",
 	"files": [
-		"dist"
+		"dist/**/*"
 	],
+	"exports": {
+		".": {
+			"import": "./dist/esm/motion.js",
+			"require": "./dist/cjs/motion.js"
+		}
+	},
 	"scripts": {
 		"build": "rm -rf dist/ && npm run build:esm && npm run build:cjs",
 		"build:esm": "tsc",
-		"build:cjs": "tsc --module CommonJS --outDir dist/cjs"
+		"build:cjs": "tsc --module CommonJS --outDir dist/cjs",
+        "clear": "rm -R ./node_modules ./dist"
 	},
 	"repository": {
 		"type": "git",
