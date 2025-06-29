@@ -3,7 +3,7 @@
  * @author Simon Watson
  */
 
-export class Motion {
+export class Motion<TState = AnyState> {
 	private static NEXT_ID = 0;
 
 	// Animation instance information
@@ -16,9 +16,9 @@ export class Motion {
 
 	// State to allow for dynamic animation changing
 	// eg. Make a single animation instance, but apply it to a dynamic DOM element on the fly
-	public state: AnyState = {};
+	public state: TState = {} as TState;
 
-	private animation: (x: number, state: AnyState) => void;
+	private animation: (x: number, state: TState) => void;
 
 	// Timing variables in ms
 	private duration = 1000;
@@ -28,8 +28,8 @@ export class Motion {
 
 	// Extra custom functions for functionality
 	private easing: EasingFunction = (x) => x;
-	private before: (state: AnyState) => void = (state) => {};
-	private then: (state: AnyState) => void = (state) => {};
+	private before: (state: TState) => void = (state) => {};
+	private then: (state: TState) => void = (state) => {};
 	private chainAfter: () => void = () => {};
 	private _reset: () => void = () => () => {};
 
@@ -52,9 +52,9 @@ export class Motion {
 	public loop: LoopType = LoopType.NONE;
 
 	/**
-	 * @param {MotionProps} props - Animation instance information.
+	 * @param {MotionProps<TState>} props - Animation instance information.
 	 */
-	constructor(props: MotionProps) {
+	constructor(props: MotionProps<TState>) {
 		this.id = ++Motion.NEXT_ID;
 
 		if (props.easing != undefined) this.easing = props.easing;
@@ -72,10 +72,10 @@ export class Motion {
 	/**
 	 * Creates a new Motion instance and plays it
 	 * Mainly used in one off cases where the animation you want to make gets played immediately
-	 * @param {MotionProps} p - The properties required to make an animation
-	 * @returns {Motion} A `Motion` instance
+	 * @param {MotionProps<TState>} p - The properties required to make an animation
+	 * @returns {Motion<TState>} A `Motion` instance
 	 */
-	public static preform(p: MotionProps): Motion {
+	public static preform<TState = AnyState>(p: MotionProps<TState>): Motion<TState> {
 		let x = new Motion(p);
 		x.play();
 		return x;
@@ -198,7 +198,7 @@ export class Motion {
 class Engine {
 	public static frameID: number = null;
 
-	public static activeInstances: Motion[] = [];
+	public static activeInstances: Motion<any>[] = [];
 
 	public static run() {
 		// If there are any queued up animations, run each one in the same frame
@@ -232,16 +232,16 @@ class Engine {
  * It is also possible to play an MotionChain in reverse by passing `true` into the `.play()` function.
  * This will play all animations from end to start.
  */
-export class MotionChain {
-	private animationInstances: Motion[] = [];
-	private runningInstances: Motion[] = [];
+export class MotionChain<TState = AnyState> {
+	private animationInstances: Motion<TState>[] = [];
+	private runningInstances: Motion<TState>[] = [];
 
 	private runningIndex: number = 0;
 
 	/**
-	 * @param {MotionProps[]} instances - An array of animation instance information. The same kind that goes into the `Motion` class
+	 * @param {MotionProps<TState>[]} instances - An array of animation instance information. The same kind that goes into the `Motion` class
 	 */
-	constructor(instances: MotionProps[]) {
+	constructor(instances: MotionProps<TState>[]) {
 		for (let instance of instances) {
 			this.animationInstances.push(new Motion(instance));
 		}
@@ -292,27 +292,27 @@ export class MotionChain {
 /**
  * Defines the different loop options
  */
-enum LoopType {
+export enum LoopType {
 	NONE,
 	LOOP,
 	ALTERNATE
 }
 
 /**
- * Any object used for `Motion` state
+ * Default state type - any object used for `Motion` state
  */
-interface AnyState {
+type AnyState = {
 	[key: string]: any;
 }
 
 /**
  * The properties used to make an animation instance
  */
-interface MotionProps {
+interface MotionProps<TState = AnyState> {
 	/**
 	 * The lambda function that runs every frame
 	 */
-	animation: (x: number) => void;
+	animation: (x: number, state: TState) => void;
 	/**
 	 * [Optional] The easing function that maps the progress of the animation
 	 */
@@ -333,16 +333,16 @@ interface MotionProps {
 	 * [Optional] A custom function that runs once before the animation starts
 	 * (Only runs on fresh starts, not when resuming from pause)
 	 */
-	before?: (state: AnyState) => void;
+	before?: (state: TState) => void;
 	/**
 	 * [Optional] A custom function that runs after an animation completes
 	 * (If `loop` is true, then it will run after each loop completion)
 	 */
-	then?: () => void;
+	then?: (state: TState) => void;
 	/**
 	 * [Optional] A state object that persists and can be accessed within the lambdas
 	 */
-	state?: AnyState;
+	state?: TState;
 	/**
 	 * [Optional] A custom reset function that will replace the default which calls the first frame of the animation
 	 */
