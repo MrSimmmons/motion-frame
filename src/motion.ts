@@ -28,9 +28,13 @@ export class Motion {
 
 	// Extra custom functions for functionality
 	private easing: EasingFunction = (x) => x;
+	private before: (state: AnyState) => void = (state) => {};
 	private then: (state: AnyState) => void = (state) => {};
 	private chainAfter: () => void = () => {};
 	private _reset: () => void = () => () => {};
+
+	// Flag to track if before method has been called for current animation cycle
+	private beforeCalled = false;
 
 	// Controlling variables
 	private _stopped = true;
@@ -57,6 +61,7 @@ export class Motion {
 		if (props.duration != undefined) this.duration = props.duration;
 		if (props.reverse != undefined) this.reverse = props.reverse;
 		if (props.loop != undefined) this.loop = props.loop;
+		if (props.before != undefined) this.before = props.before;
 		if (props.then != undefined) this.then = props.then;
 		if (props.state != undefined) this.state = props.state;
 		if (props.reset != undefined) this._reset = props.reset;
@@ -100,6 +105,12 @@ export class Motion {
 
 		if (!this.startTime) this.startTime = time;
 
+		// Call before method once at the start of a fresh animation
+		if (!this.beforeCalled && this.progress === 0) {
+			this.before(this.state);
+			this.beforeCalled = true;
+		}
+
 		// If the animation has completed
 		if (time - this.startTime + this.progress >= this.duration) {
 			// Trigger the animation in its final state
@@ -112,6 +123,7 @@ export class Motion {
 			if (this.loop != LoopType.NONE) {
 				this.startTime = 0;
 				this.progress = 0;
+				this.beforeCalled = false;
 				if (this.loop == LoopType.ALTERNATE) this.reverse = !this.reverse;
 			} else {
 				this.stop();
@@ -147,6 +159,7 @@ export class Motion {
 		this._paused = false;
 		this.startTime = 0;
 		this.progress = 0;
+		this.beforeCalled = false;
 	}
 
 	/**
@@ -316,6 +329,11 @@ interface MotionProps {
 	 * [Optional] Whether the animation loops once it completes
 	 */
 	loop?: LoopType;
+	/**
+	 * [Optional] A custom function that runs once before the animation starts
+	 * (Only runs on fresh starts, not when resuming from pause)
+	 */
+	before?: (state: AnyState) => void;
 	/**
 	 * [Optional] A custom function that runs after an animation completes
 	 * (If `loop` is true, then it will run after each loop completion)
