@@ -123,7 +123,7 @@ export class Motion {
 			if (this.loop != LoopType.NONE) {
 				this.startTime = 0;
 				this.progress = 0;
-				this.beforeCalled = false; // Reset for next loop iteration
+				this.beforeCalled = false;
 				if (this.loop == LoopType.ALTERNATE) this.reverse = !this.reverse;
 			} else {
 				this.stop();
@@ -159,7 +159,7 @@ export class Motion {
 		this._paused = false;
 		this.startTime = 0;
 		this.progress = 0;
-		this.beforeCalled = false; // Reset so before will be called on next play
+		this.beforeCalled = false;
 	}
 
 	/**
