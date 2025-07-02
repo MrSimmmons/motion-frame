@@ -1,6 +1,6 @@
 # Change Log
 
-# 2.0.0 (2022-11-12)
+## 2.0.0 (2022-11-12)
 
 Version 2 :tada:
 
@@ -63,6 +63,6 @@ In this release comes a complete TypeScript rewrite, more efficient engine, simp
 
 ---
 
-# 1.0.0 (2020-09-09)
+## 1.0.0 (2020-09-09)
 
 - Initial Release

@@ -29,7 +29,7 @@ export class Motion<TState = AnyState> {
 	// Extra custom functions for functionality
 	private easing: EasingFunction = (x) => x;
 	private before: (state: TState) => void = (state) => {};
-	private then: (state: TState) => void = (state) => {};
+	private after: (state: TState) => void = (state) => {};
 	private chainAfter: () => void = () => {};
 	private _reset: () => void = () => () => {};
 
@@ -62,7 +62,7 @@ export class Motion<TState = AnyState> {
 		if (props.reverse != undefined) this.reverse = props.reverse;
 		if (props.loop != undefined) this.loop = props.loop;
 		if (props.before != undefined) this.before = props.before;
-		if (props.then != undefined) this.then = props.then;
+		if (props.after != undefined) this.after = props.after;
 		if (props.state != undefined) this.state = props.state;
 		if (props.reset != undefined) this._reset = props.reset;
 
@@ -122,7 +122,7 @@ export class Motion<TState = AnyState> {
 			});
 			this._playCount++;
 
-			this.then(this.state);
+			this.after(this.state);
 
 			// If the animation loops, reset it otherwise stop the animation
 			if (this.loop != LoopType.NONE) {
@@ -197,7 +197,7 @@ export class Motion<TState = AnyState> {
 
 	/**
 	 * Sets the `chainAfter()` function.
-	 * This method is designed to be used by the `MotionChain` class and can be ignored by the developer. See `.then` for a purpose built solution
+	 * This method is designed to be used by the `MotionChain` class and can be ignored by the developer. See `.after` for a purpose built solution
 	 */
 	public setChain(func: () => void) {
 		this.chainAfter = func;
@@ -223,7 +223,7 @@ class Engine {
 	}
 
 	private static tick(time: number) {
-		// We loop through the instances backwards so if we have to remove an instance, we dont have to
+		// We loop through the instances backwards so if we have to remove an instance, we don't have to
 		for (let i = Engine.activeInstances.length - 1; i >= 0; i--) {
 			// If the animation is paused or has stopped, remove it from the queue
 			let instance = Engine.activeInstances[i];
@@ -240,7 +240,7 @@ class Engine {
 /**
  * The MotionChain class allows you to chain multiple animations to play one after the other in order.
  *
- * To do this it uses a separate system than the `.then()` so it still allows for custom `.then()` functions to be called after each separate animation completion.
+ * To do this it uses a separate system than the `.after()` so it still allows for custom `.after()` functions to be called after each separate animation completion.
  *
  * It is also possible to play an MotionChain in reverse by passing `true` into the `.play()` function.
  * This will play all animations from end to start.
@@ -351,7 +351,7 @@ interface MotionProps<TState = AnyState> {
 	 * [Optional] A custom function that runs after an animation completes
 	 * (If `loop` is true, then it will run after each loop completion)
 	 */
-	then?: (state: TState) => void;
+	after?: (state: TState) => void;
 	/**
 	 * [Optional] A state object that persists and can be accessed within the lambdas
 	 */
