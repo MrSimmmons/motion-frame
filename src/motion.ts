@@ -18,7 +18,7 @@ export class Motion<TState = AnyState> {
 	// eg. Make a single animation instance, but apply it to a dynamic DOM element on the fly
 	public state: TState = {} as TState;
 
-	private animation: (x: number, options: AnimationOptions, state: TState) => void;
+	private animation: (frame: AnimationFrame<TState>) => void;
 
 	// Timing variables in ms
 	private duration = 1000;
@@ -115,7 +115,11 @@ export class Motion<TState = AnyState> {
 		if (time - this.startTime + this.progress >= this.duration) {
 			// Trigger the animation in its final state
 			const finalX = this.reverse ? 0 : 1;
-			this.animation(finalX, { unmodifiedX: finalX }, this.state);
+			this.animation({
+				progress: finalX,
+				progressMs: finalX,
+				state: this.state
+			});
 			this._playCount++;
 
 			this.then(this.state);
@@ -133,11 +137,13 @@ export class Motion<TState = AnyState> {
 		}
 		// Else continue the animation
 		else {
-			let percentage = (time - this.startTime + this.progress) / this.duration;
-			let mappedX = this.easing(percentage);
-			const unmodifiedX = this.reverse ? 1 - percentage : percentage;
-			const easedX = this.reverse ? 1 - mappedX : mappedX;
-			this.animation(easedX, { unmodifiedX }, this.state);
+			const percentage = (time - this.startTime + this.progress) / this.duration;
+			const easedPercentage = this.easing(percentage);
+			this.animation({
+				progress: this.reverse ? 1 - easedPercentage : easedPercentage,
+				progressMs: this.reverse ? 1 - percentage : percentage,
+				state: this.state
+			});
 		}
 	}
 
@@ -181,7 +187,11 @@ export class Motion<TState = AnyState> {
 	 */
 	public reset() {
 		this.stop();
-		this.animation(0, { unmodifiedX: 0 }, this.state);
+		this.animation({
+			progress: 0,
+			progressMs: 0,
+			state: this.state
+		});
 		this._reset();
 	}
 
@@ -315,7 +325,7 @@ interface MotionProps<TState = AnyState> {
 	/**
 	 * The lambda function that runs every frame
 	 */
-	animation: (x: number, options: AnimationOptions, state: TState) => void;
+	animation: (frame: AnimationFrame<TState>) => void;
 	/**
 	 * [Optional] The easing function that maps the progress of the animation
 	 */
@@ -357,9 +367,17 @@ type EasingFunction = (x: number) => number;
 /**
  * Options passed to the animation function containing additional values
  */
-export interface AnimationOptions {
+export interface AnimationFrame<TState = AnyState> {
 	/**
-	 * The unmodified progress value (0-1) before easing is applied
+	 * The transformed progress value (0-1) of the animation after easing is applied
 	 */
-	unmodifiedX: number;
+	progress: number;
+	/**
+	 * The un-transformed progress value (0-1) of the animation
+	 */
+	progressMs: number;
+	/**
+	 * The current animation state object
+	 */
+	state: TState;
 }
