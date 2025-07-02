@@ -1,5 +1,29 @@
 # Change Log
 
+## 2.1.0 (2025-07-02)
+
+### BREAKING CHANGES
+
+- The `then` property and method have been renamed to `after` throughout the codebase and documentation for improved clarity and consistency. You must now use `after` instead of `then` in all `MotionProps` and when handling animation completion callbacks.
+- The animation function signature in `MotionProps` has changed: it now receives a single `AnimationFrame` object containing `{ progress, progressMs, state }`. Previous only `progress, state?` was supplied
+
+### Added
+
+- New `before` property: an optional function that runs once before the animation starts (on fresh starts, not when resuming from pause).
+- The animation function now receives both the eased progress (`progress`) and the linear progress (`progressMs`), allowing for more complex animation effects.
+- TypeScript generics are now used for state in `Motion` and `MotionChain`. This is to allow for string typing when accessing the `state` property either from the `Motion` instance or from the `state` value from the `animation` function.
+
+### Changed
+
+- Refactored the `then` method/property to `after` in the `Motion` class, types, and documentation.
+- The animation function now takes an `AnimationFrame` object, providing both eased and linear progress values, and the current state.
+- Improved TypeScript types: `Motion`, `MotionChain`, and `MotionProps` are now generic over state, and the default state type is an object.
+- Updated documentation and usage examples to reflect the new API and type changes.
+- Improved clarity in comments and documentation regarding animation callbacks and state.
+- Minor typo and formatting fixes in comments and documentation.
+
+---
+
 ## 2.0.0 (2022-11-12)
 
 Version 2 :tada:

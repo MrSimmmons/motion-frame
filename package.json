@@ -1,6 +1,6 @@
 {
 	"name": "motion-frame",
-	"version": "2.0.2",
+	"version": "2.1.0",
 	"description": "A Typescript lambda animation / easing engine",
 	"main": "dist/cjs/motion.js",
 	"module": "dist/esm/motion.js",
