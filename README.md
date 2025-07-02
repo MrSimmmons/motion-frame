@@ -12,16 +12,16 @@ To use Motion Frame, run `npm install motion-frame` and import `Motion` and / or
 
 ###### \* is required
 
-| Key            | Type                 | Default         | Description                                                                     |
-| -------------- | -------------------- | --------------- | ------------------------------------------------------------------------------- |
-| `animation` \* | Function (x, state?) | `null`          | The lambda animation that will run                                              |
-| `easing`       | Function (x)         | `(x) => x`      | The easing function that the animation will take                                |
-| `duration`     | Number               | `1000`          | The duration of the animation in milliseconds                                   |
-| `reverse`      | Boolean              | `false`         | If the animation should play in reverse                                         |
-| `loop`         | LoopType             | `LoopType.NONE` | If the animation should loop after it finishes                                  |
-| `then`         | Function (state)     | `(state) => {}` | A function that will trigger once the animation has finished each run           |
-| `state`        | Object               | `{}`            | Persistent state that can be accessed within the `animation` and `then` lambdas |
-| `reset`        | Function             | void            | Gets called immediately after the animation gets reset to its original position |
+| Key            | Type                           | Default         | Description                                                                     |
+| -------------- | ------------------------------ | --------------- | ------------------------------------------------------------------------------- |
+| `animation` \* | Function (x, options, state?) | `null`          | The lambda animation that will run                                              |
+| `easing`       | Function (x)                   | `(x) => x`      | The easing function that the animation will take                                |
+| `duration`     | Number                         | `1000`          | The duration of the animation in milliseconds                                   |
+| `reverse`      | Boolean                        | `false`         | If the animation should play in reverse                                         |
+| `loop`         | LoopType                       | `LoopType.NONE` | If the animation should loop after it finishes                                  |
+| `then`         | Function (state)               | `(state) => {}` | A function that will trigger once the animation has finished each run           |
+| `state`        | Object                         | `{}`            | Persistent state that can be accessed within the `animation` and `then` lambdas |
+| `reset`        | Function                       | void            | Gets called immediately after the animation gets reset to its original position |
 
 ### Example
 
@@ -35,7 +35,7 @@ const boxAnimation = new Motion({
 	duration: 2000,
 	loop: LoopType.ALTERNATE,
 	easing: (x) => (x < 0.5 ? 8 * x * x * x * x : 1 - Math.pow(-2 * x + 2, 4) / 2),
-	animation: (x) => {
+	animation: (x, options) => {
 		let destX = (window.innerWidth - boxRect.width) / 2;
 		let amountX = (destX - boxRect.left) * x;
 
@@ -47,6 +47,38 @@ const boxAnimation = new Motion({
 });
 
 boxAnimation.play();
+```
+
+### Animation Options
+
+The animation function receives three parameters:
+- `x` (number): The eased progress value (0-1) after the easing function has been applied
+- `options` (AnimationOptions): An object containing additional values:
+  - `unmodifiedX` (number): The unmodified progress value (0-1) before easing is applied
+- `state` (TState): The persistent state object
+
+This allows you to use different progression values for different aspects of your animation:
+
+```ts
+import { Motion, AnimationOptions } from "motion-frame";
+
+const complexAnimation = new Motion({
+	duration: 1000,
+	easing: (x) => x * x, // Quadratic easing
+	animation: (easedX, options: AnimationOptions) => {
+		const { unmodifiedX } = options;
+		
+		// Use eased value for position (accelerated movement)
+		element.style.left = `${easedX * 100}px`;
+		
+		// Use linear value for opacity (steady fade)
+		element.style.opacity = unmodifiedX;
+		
+		// Use linear value for color transitions
+		const hue = unmodifiedX * 360;
+		element.style.backgroundColor = `hsl(${hue}, 50%, 50%)`;
+	}
+});
 ```
 
 <img src="docs/example.gif">

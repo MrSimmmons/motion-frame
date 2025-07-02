@@ -18,7 +18,7 @@ export class Motion<TState = AnyState> {
 	// eg. Make a single animation instance, but apply it to a dynamic DOM element on the fly
 	public state: TState = {} as TState;
 
-	private animation: (x: number, state: TState) => void;
+	private animation: (x: number, options: AnimationOptions, state: TState) => void;
 
 	// Timing variables in ms
 	private duration = 1000;
@@ -114,7 +114,8 @@ export class Motion<TState = AnyState> {
 		// If the animation has completed
 		if (time - this.startTime + this.progress >= this.duration) {
 			// Trigger the animation in its final state
-			this.animation(this.reverse ? 0 : 1, this.state);
+			const finalX = this.reverse ? 0 : 1;
+			this.animation(finalX, { unmodifiedX: finalX }, this.state);
 			this._playCount++;
 
 			this.then(this.state);
@@ -134,7 +135,9 @@ export class Motion<TState = AnyState> {
 		else {
 			let percentage = (time - this.startTime + this.progress) / this.duration;
 			let mappedX = this.easing(percentage);
-			this.animation(this.reverse ? 1 - mappedX : mappedX, this.state);
+			const unmodifiedX = this.reverse ? 1 - percentage : percentage;
+			const easedX = this.reverse ? 1 - mappedX : mappedX;
+			this.animation(easedX, { unmodifiedX }, this.state);
 		}
 	}
 
@@ -178,7 +181,7 @@ export class Motion<TState = AnyState> {
 	 */
 	public reset() {
 		this.stop();
-		this.animation(0, this.state);
+		this.animation(0, { unmodifiedX: 0 }, this.state);
 		this._reset();
 	}
 
@@ -312,7 +315,7 @@ interface MotionProps<TState = AnyState> {
 	/**
 	 * The lambda function that runs every frame
 	 */
-	animation: (x: number, state: TState) => void;
+	animation: (x: number, options: AnimationOptions, state: TState) => void;
 	/**
 	 * [Optional] The easing function that maps the progress of the animation
 	 */
@@ -350,3 +353,13 @@ interface MotionProps<TState = AnyState> {
 }
 
 type EasingFunction = (x: number) => number;
+
+/**
+ * Options passed to the animation function containing additional values
+ */
+export interface AnimationOptions {
+	/**
+	 * The unmodified progress value (0-1) before easing is applied
+	 */
+	unmodifiedX: number;
+}
