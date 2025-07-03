@@ -39,6 +39,6 @@
 		"lerp"
 	],
 	"devDependencies": {
-		"typescript": "^4.8.4"
+		"typescript": "^5.8.3"
 	}
 }
